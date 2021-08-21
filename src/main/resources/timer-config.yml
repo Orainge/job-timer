@@ -1,0 +1,21 @@
+# HTTP 客户端配置
+http-client:
+  connect-timeout: 20 # 连接超时超时
+  read-timeout: 120 # 读取数据超时时间
+  show-log: false # 使用自定义的客户端是否输出请求结果
+
+# 多线程默认配置
+job:
+  multi-thread:
+    # 多线程配置
+    scheduler: # 同步线程池配置
+      thread-name-prefix: taskScheduler
+      pool-size: 10
+      wait-for-tasks-to-complete-on-shutdown: true
+      await-termination-seconds: 5
+    executor: # 异步执行线程池
+      thread-name-prefix: taskExecutor
+      max-pool-size: 30
+      core-pool-size: 20
+      queue-capacity: 10
+      keep-alive-seconds: 600
