@@ -33,7 +33,7 @@ public class CheckAliveController {
 
     @PostConstruct
     public void init() {
-        enable = systemConfig.getCheckAliveApiConfig().isEnable();
+        enable = systemConfig.getCheckAliveApi().isEnable();
 
         if (enable) {
             log.info("[系统运行状态检测 API] - 已开启");

@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class SystemConfig {
     private CheckAliveApiConfig checkAliveApi;
 
-    public CheckAliveApiConfig getCheckAliveApiConfig() {
+    public CheckAliveApiConfig getCheckAliveApi() {
         return checkAliveApi;
     }
 
