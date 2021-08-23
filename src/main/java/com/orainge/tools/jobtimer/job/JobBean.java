@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import java.util.Map;
+
 /**
  * 定时任务抽象类
  *
@@ -33,10 +35,24 @@ public abstract class JobBean {
         }
     }
 
-    public JobResult execute() {
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * 执行任务
+     *
+     * @param execParam 执行任务的参数
+     * @return 执行结果
+     */
+    public JobResult execute(Map<String, String[]> execParam) {
         try {
             log.info("[" + name + "] - " + description + ": 开始");
-            JobResult execResult = doExecute();
+            JobResult execResult = doExecute(execParam);
             log.info("[" + name + "] - " + description + ": 结束");
             return execResult;
         } catch (Exception e) {
@@ -45,7 +61,14 @@ public abstract class JobBean {
         }
     }
 
-    public abstract JobResult doExecute();
+    /**
+     * 执行任务<br>
+     * 需要重写具体的执行方法
+     *
+     * @param execParam 执行参数
+     * @return 执行结果
+     */
+    public abstract JobResult doExecute(Map<String, String[]> execParam);
 
     protected void logInfo(String message, Object... arguments) {
         log.info("[" + name + "] - " + description + ": " + message, arguments);

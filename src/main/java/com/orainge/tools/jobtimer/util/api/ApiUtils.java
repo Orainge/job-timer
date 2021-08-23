@@ -1,10 +1,17 @@
 package com.orainge.tools.jobtimer.util.api;
 
 import com.orainge.tools.jobtimer.config.ApiConfig;
-import com.orainge.tools.jobtimer.util.HttpClient;
+import com.orainge.tools.jobtimer.util.JSONUtils;
+import com.orainge.tools.jobtimer.util.http.HttpClient;
+import com.orainge.tools.jobtimer.util.http.HttpClientParameter;
 import com.orainge.tools.jobtimer.util.key.ApiKeyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.ui.ModelMap;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -24,6 +31,9 @@ public abstract class ApiUtils {
 
     @Resource
     private ApiConfig apiConfig;
+
+    @Resource
+    private JSONUtils jsonUtils;
 
     protected String utilName;
 
@@ -88,14 +98,55 @@ public abstract class ApiUtils {
     }
 
     /**
-     * 执行获取操作<br>
-     * 参数不包括 Key，需要重写 addKeyParams参数。
+     * 执行 GET 操作
      *
      * @param apiName     API名称
-     * @param params      params={p1:a, p2: b}, 结果url: url?p1={p1}&p2={p2}
+     * @param headers     请求头
+     * @param params      请求参数
+     * @param body        请求体
      * @param extraParams 额外参数，不参与请求
      */
-    protected Map<String, Object> doGetData(String apiName, Map<String, Object> params, Map<String, Object> extraParams) {
+    protected Map<String, Object> doGet(String apiName,
+                                        MultiValueMap<String, String> headers,
+                                        MultiValueMap<String, Object> params,
+                                        Object body,
+                                        Map<String, Object> extraParams) {
+        return exchange(HttpMethod.GET, apiName, headers, params, body, extraParams);
+    }
+
+    /**
+     * 执行 POST 操作
+     *
+     * @param apiName     API名称
+     * @param headers     请求头
+     * @param params      请求参数
+     * @param body        请求体
+     * @param extraParams 额外参数，不参与请求
+     */
+    protected Map<String, Object> doPost(String apiName,
+                                         MultiValueMap<String, String> headers,
+                                         MultiValueMap<String, Object> params,
+                                         Object body,
+                                         Map<String, Object> extraParams) {
+        return exchange(HttpMethod.POST, apiName, headers, params, body, extraParams);
+    }
+
+    /**
+     * 执行获取操作
+     *
+     * @param method      请求方式
+     * @param apiName     API名称
+     * @param headers     请求头
+     * @param params      请求参数
+     * @param body        请求体
+     * @param extraParams 额外参数，不参与请求
+     */
+    protected Map<String, Object> exchange(HttpMethod method,
+                                           String apiName,
+                                           MultiValueMap<String, String> headers,
+                                           MultiValueMap<String, Object> params,
+                                           Object body,
+                                           Map<String, Object> extraParams) {
         // 获取接口 url
         String api = apiDetailsConfig.getApi().get(apiName);
         if (StringUtils.isEmpty(api)) {
@@ -104,7 +155,12 @@ public abstract class ApiUtils {
         String baseUrl = apiDetailsConfig.getUrl() + api;
 
         // 准备参数 Map
-        Map<String, Object> urlParams = new LinkedHashMap<>(params);
+        MultiValueMap<String, Object> urlParams;
+        if (params != null) {
+            urlParams = new LinkedMultiValueMap<>(params);
+        } else {
+            urlParams = new LinkedMultiValueMap<>();
+        }
 
         // 准备额外参数 Map
         if (extraParams == null) {
@@ -112,7 +168,7 @@ public abstract class ApiUtils {
         }
 
         // 准备结果数据 Map
-        Map<String, Object> resultData = null;
+        Map<String, Object> responseBody = null;
 
         while (true) {
             // Key 值
@@ -128,21 +184,7 @@ public abstract class ApiUtils {
                 }
 
                 // 添加/更新 Key 参数
-                urlParams.put(apiKeyManager.getKeyParameterName(), key);
-            }
-
-            // 拼接 url 参数
-            StringBuilder urlBuilder = new StringBuilder(baseUrl);
-            if (!urlParams.isEmpty()) {
-                urlBuilder.append("?");
-                int i = 0;
-                for (String keyItem : urlParams.keySet()) {
-                    i++;
-                    urlBuilder.append(keyItem).append("=").append("{").append(keyItem).append("}");
-                    if (i != urlParams.size()) {
-                        urlBuilder.append("&");
-                    }
-                }
+                urlParams.add(apiKeyManager.getKeyParameterName(), key);
             }
 
             boolean isKeyExpire = false;
@@ -150,37 +192,60 @@ public abstract class ApiUtils {
 
             // 重试机制
             int retryTimes = apiDetailsConfig.getRetryTimes();
-            int i = 0;
-            for (; i <= retryTimes; i++) {
-                // 调用接口进行查询
-                resultData = httpClient.doGetMap(urlBuilder.toString(), urlParams);
+            for (int i = 0; i <= retryTimes; i++) {
+                HttpClientParameter httpClientParameter = HttpClientParameter.build()
+                        .setMethod(method)
+                        .setUrl(baseUrl)
+                        .addHeaders(headers)
+                        .addParamsObjectMap(urlParams)
+                        .setBody(body);
 
-                if (Objects.isNull(resultData)) {
+                // 调用接口进行查询
+                ResponseEntity<String> resultEntity = httpClient.exchangeForEntity(httpClientParameter, String.class);
+
+                if (Objects.isNull(resultEntity) || StringUtils.isEmpty(resultEntity.getBody())) {
                     // 获取结果为空时，执行回调函数
-                    Integer nextRetryTimes = i + 1 <= retryTimes ? i + 1 : null;
-                    onResultNull(key, urlParams, extraParams);
-                    if (nextRetryTimes != null) {
-                        logWarn("获取信息错误: 进行第 {} 次重试", nextRetryTimes);
-                    }
+                    onResultNull(key, httpClientParameter, extraParams);
                 } else {
-                    // 获取到数据后，判断数据是否获取成功
-                    if (checkIfResultSuccess(resultData, extraParams)) {
+                    // 获取到数据后，尝试将数据转换为 Map
+                    String responseBodyStr = resultEntity.getBody();
+                    responseBody = jsonUtils.parseObjectToMap(responseBodyStr);
+
+                    if (responseBody == null) {
+                        // 无法将获取到的数据转换为 Map
+                        responseBody = onResultFailToMap(key, httpClientParameter, responseBodyStr, extraParams);
+                        if (responseBody == null) {
+                            // 不能处理请求结果，继续重试请求
+                            continue;
+                        }
+                    }
+
+                    // 获取到的结果能转换为 Map
+                    // 判断数据是否获取成功
+                    if (checkIfResultSuccess(httpClientParameter, responseBody, extraParams)) {
                         // 数据获取成功
                         // 如果需要 Key 才能进行访问，则需要判断 Key 是否过期
-                        if (apiKeyManager != null && checkIfKeyExpire(resultData, extraParams)) {
+                        if (apiKeyManager != null && checkIfKeyExpire(httpClientParameter, responseBody, extraParams)) {
                             // Key 过期
                             apiKeyManager.setExpire(key); // 设置该 Key 已过期
                             isKeyExpire = true;
-                            break;
+                            responseBody = null;
                         } else {
                             // 不需要Key 或 Key 没有过期，执行成功回调函数
-                            onSuccess(resultData, extraParams);
+                            onSuccess(key, httpClientParameter, responseBody, extraParams);
                             isSuccess = true;
-                            break;
                         }
+                        break;
                     } else {
-                        onResultFail(key, resultData, extraParams);
+                        // 数据获取失败
+                        onResultFail(key, httpClientParameter, responseBodyStr, responseBody, extraParams);
+                        responseBody = null;
                     }
+                }
+
+                Integer nextRetryTimes = i + 1 <= retryTimes ? i + 1 : null;
+                if (nextRetryTimes != null) {
+                    logWarn("获取信息错误: 进行第 {} 次重试", nextRetryTimes);
                 }
             }
 
@@ -194,40 +259,49 @@ public abstract class ApiUtils {
             }
         }
 
-        return resultData;
+        return responseBody;
     }
 
     protected void logWarn(String message, Object... arguments) {
-        log.warn("[" + utilName + " 配置文件] - " + message, arguments);
+        log.warn("[" + utilName + " API 工具] - " + message, arguments);
     }
 
     protected void logError(String message, Object... arguments) {
-        log.error("[" + utilName + " 配置文件] - " + message, arguments);
+        log.error("[" + utilName + " API 工具] - " + message, arguments);
     }
 
     /**
-     * 判断 Key 是否过期
+     * 判断函数：判断 Key 是否过期<br>
+     * 当访问 API 不需要 KEY 时，该函数返回值忽略
      */
-    public abstract boolean checkIfKeyExpire(Map<String, Object> resultData, Map<String, Object> extraParams);
+    public abstract boolean checkIfKeyExpire(HttpClientParameter httpClientParameter, Map<String, Object> responseBody, Map<String, Object> extraParams);
 
     /**
-     * 当有返回结果时，需要判断该返回结果是否为符合成功获取条件<br>
-     * 例如，返回状态码的值是否正确<br>
+     * 判断函数：当有返回结果时，判断返回结果是否为符合"获取成功"的条件<br>
+     * 例如，返回状态码的值是否正确
      */
-    public abstract boolean checkIfResultSuccess(Map<String, Object> resultData, Map<String, Object> extraParams);
+    public abstract boolean checkIfResultSuccess(HttpClientParameter httpClientParameter, Map<String, Object> responseBody, Map<String, Object> extraParams);
 
     /**
-     * 当返回结果为 NULL 时的回调函数
+     * 回调函数：当返回结果为 NULL 时
      */
-    public abstract void onResultNull(String nowKey, Map<String, Object> urlParams, Map<String, Object> extraParams);
+    public abstract void onResultNull(String nowKey, HttpClientParameter httpClientParameter, Map<String, Object> extraParams);
 
     /**
-     * 当有返回结果，但结果错误时的回调函数
+     * 回调函数：有返回结果，但是无法将请求结果转化为 Map 类型<br>
+     * 如果可以，可以在这里处理请求结果<br>
+     *
+     * @return null: 不能处理请求结果，继续重试请求; 非 null: 对请求结果进行处理，返回正确的 Map，继续执行下面的处理流程
      */
-    public abstract void onResultFail(String nowKey, Map<String, Object> resultData, Map<String, Object> extraParams);
+    public abstract Map<String, Object> onResultFailToMap(String nowKey, HttpClientParameter httpClientParameter, String responseBodyStr, Map<String, Object> extraParams);
 
     /**
-     * 当有返回结果，且结果正确时的回调函数
+     * 回调函数：有返回结果，但是结果错误时
      */
-    public abstract void onSuccess(Map<String, Object> resultData, Map<String, Object> extraParams);
+    public abstract void onResultFail(String nowKey, HttpClientParameter httpClientParameter, String responseBodyStr, Map<String, Object> responseBody, Map<String, Object> extraParams);
+
+    /**
+     * 回调函数：有返回结果，且结果正确时
+     */
+    public abstract void onSuccess(String nowKey, HttpClientParameter httpClientParameter, Map<String, Object> responseBody, Map<String, Object> extraParams);
 }

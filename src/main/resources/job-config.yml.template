@@ -1,12 +1,14 @@
-job:
-  api:
-    enable: true # 是否开启 API 控制，默认为不开启
-    token: abcdefg # 调用的token
-    url:
-      # API 执行路径
-      jobName1: /jobName1
-  task:
+job-timer:
+  job:
+    # 任务 API 控制配置
+    api:
+      enable: true # 是否开启 API 控制，默认为不开启
+      token: abcdefg # 调用的token
+      url:
+        # API 执行路径
+        jobName1: /jobName1
     # 定时配置任务配置
-    enable: false # 是否开启定时任务，默认为不开启
-    cron:
-      jobName1: 0 0/10 * * * ?
+    task:
+      enable: false # 是否开启定时任务，默认为不开启
+      cron:
+        jobName1: 0 0/10 * * * ?

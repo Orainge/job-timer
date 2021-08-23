@@ -15,7 +15,7 @@ import java.util.Map;
  * @date 2021/6/10
  */
 @Configuration
-@ConfigurationProperties(prefix = "job")
+@ConfigurationProperties(prefix = "job-timer.job")
 public class JobConfig {
     private static final Logger log = LoggerFactory.getLogger(JobConfig.class);
 

@@ -62,7 +62,7 @@ public class JobManager implements SchedulingConfigurer {
                         // 如果 cron 不为空，就配置定时任务
                         taskRegistrar.addTriggerTask(
                                 //1. 添加任务内容 (Runnable)
-                                () -> threadPoolTaskExecutor.execute(() -> execute(jobName)),
+                                () -> threadPoolTaskExecutor.execute(() -> execute(jobName, null)),
 
                                 //2. 设置执行周期 (Trigger)
                                 triggerContext -> new CronTrigger(jobCron).nextExecutionTime(triggerContext)
@@ -83,22 +83,49 @@ public class JobManager implements SchedulingConfigurer {
      * @return Job Class 名称
      */
     public static boolean isExistJobBean(String jobName) {
-        return BeanUtils.containsBean(jobName);
+        return BeanUtils.containsBean(getJobBeanName(jobName));
     }
 
     /**
      * 执行任务
      *
-     * @param jobName 任务名称
+     * @param jobName   任务名称
+     * @param execParam 执行任务参数
      */
-    public static JobResult execute(String jobName) {
+    public static JobResult execute(String jobName, Map<String, String[]> execParam) {
+        JobResult jobResult = null;
         try {
-            String jobBeanName = jobName.substring(0, 1).toLowerCase() + jobName.substring(1) + "Job";
-            JobBean jobInterface = BeanUtils.getBean(jobBeanName, JobBean.class);
-            return jobInterface.execute();
+            // 获取 JobBean
+            JobBean jobBean = BeanUtils.getBean(getJobBeanName(jobName), JobBean.class);
+
+            // 执行任务
+            jobResult = jobBean.execute(execParam);
+
+            // 写入任务信息
+            jobResult.setJobName(jobBean.getName());
+            jobResult.setJobDescription(jobBean.getDescription());
+
+            // 返回任务结果
+            return jobResult;
         } catch (Exception e) {
-            log.error("[定时任务管理器] - 任务出错", e);
-            return JobResult.fail();
+            String errMsg = "[定时任务管理器] - 任务 [" + jobName + "] 出错";
+            if (jobResult != null) {
+                errMsg += "[任务名称: " + jobResult.getJobName() + ", 任务描述: " + jobResult.getJobDescription() + "]";
+            }
+            log.error(errMsg, e);
+
+            // 返回错误结果
+            return jobResult == null ? JobResult.fail() : jobResult.setSuccess(false);
         }
+    }
+
+    /**
+     * 根据 JobName 获取在 Springboot 容器中对应的 JonBean 类
+     *
+     * @param jobName 任务名称
+     * @return 对应的 JonBean 类
+     */
+    private static String getJobBeanName(String jobName) {
+        return jobName.substring(0, 1).toLowerCase() + jobName.substring(1) + "Job";
     }
 }

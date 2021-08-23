@@ -1,10 +1,12 @@
 package com.orainge.tools.jobtimer.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -20,7 +22,17 @@ import java.util.Objects;
 @ConditionalOnMissingBean({ObjectUtils.class})
 public class ObjectUtils {
     @Resource
-    private ObjectMapper objectMapper;
+    private ObjectMapper objectMapperBean;
+
+    private static ObjectMapper objectMapper = null;
+
+    @PostConstruct
+    public void init() {
+        objectMapper = objectMapperBean;
+        if (objectMapper == null) {
+            objectMapper = new ObjectMapper();
+        }
+    }
 
     /**
      * 根据属性名获取属性值
@@ -81,14 +93,14 @@ public class ObjectUtils {
     /**
      * object 对象转 Map
      */
-    @SuppressWarnings("all")
     public Map<String, Object> objectToMap(Object obj) {
         if (obj == null) {
             return null;
         }
 
         try {
-            return objectMapper.convertValue(obj, Map.class);
+            return objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {
+            });
         } catch (Exception e) {
             return null;
         }
@@ -97,14 +109,14 @@ public class ObjectUtils {
     /**
      * string 对象转 Map
      */
-    @SuppressWarnings("all")
     public Map<String, Object> stringToMap(String str) {
         if (StringUtils.isEmpty(str)) {
             return null;
         }
 
         try {
-            return objectMapper.readValue(str, Map.class);
+            return objectMapper.convertValue(str, new TypeReference<Map<String, Object>>() {
+            });
         } catch (Exception e) {
             return null;
         }

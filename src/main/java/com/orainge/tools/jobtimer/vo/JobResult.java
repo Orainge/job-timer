@@ -17,6 +17,16 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class JobResult {
     /**
+     * 任务名称
+     */
+    private String jobName;
+
+    /**
+     * 描述
+     */
+    private String jobDescription;
+
+    /**
      * 任务是否执行成功
      */
     private boolean success;
@@ -30,6 +40,22 @@ public class JobResult {
      * 任务执行结果描述
      */
     private List<String> messageDescription;
+
+    public String getJobName() {
+        return jobName;
+    }
+
+    public void setJobName(String jobName) {
+        this.jobName = jobName;
+    }
+
+    public String getJobDescription() {
+        return jobDescription;
+    }
+
+    public void setJobDescription(String jobDescription) {
+        this.jobDescription = jobDescription;
+    }
 
     public boolean isSuccess() {
         return success;
@@ -73,7 +99,6 @@ public class JobResult {
         this.messageDescription.addAll(messageDescription);
         return this;
     }
-
 
     public static JobResult build() {
         return new JobResult();

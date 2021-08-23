@@ -34,7 +34,7 @@ public class ScheduleExecutorConfig implements SchedulingConfigurer {
     /**
      * 定时任务使用的同步线程池
      */
-    @Bean(destroyMethod = "shutdown", name = "taskScheduler")
+    @Bean(name = "taskScheduler")
     public ThreadPoolTaskScheduler taskScheduler() {
         JobConfig.JobSchedulerConfig config = jobConfig.getMultiThread().getScheduler();
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();

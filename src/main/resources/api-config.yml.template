@@ -1,19 +1,20 @@
-# 外部 API 配置
-api:
-  config:
-    # 接口1
-    api1:
-      url: https://api.xxx1.com
-      need-key: true
-      key-parameter-name: key
-      keys: key1, key2, key3
-      retry-times: 3 # 连接失败的重试次数
-      api:
-        apiName1: /apiname1
-    # 接口 2
-    api2:
-      url: https://api.xxx2.com
-      needKey: false
-      retry-times: 3 # 连接失败的重试次数
-      api:
-        apiName1: /apiname1
+job-timer:
+  # 外部 API 配置
+  extra-api:
+    config:
+      # 接口1
+      api1:
+        url: https://api.xxx1.com
+        need-key: true
+        key-parameter-name: key
+        keys: key1, key2, key3
+        retry-times: 3 # 连接失败的重试次数
+        api:
+          apiName1: /apiname1
+      # 接口 2
+      api2:
+        url: https://api.xxx2.com
+        need-key: false
+        retry-times: 3 # 连接失败的重试次数
+        api:
+          apiName1: /apiname1

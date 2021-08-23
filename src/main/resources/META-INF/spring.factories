@@ -2,11 +2,13 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 com.orainge.tools.jobtimer.config.JobConfig,\
   com.orainge.tools.jobtimer.config.ApiConfig,\
+  com.orainge.tools.jobtimer.config.SystemConfig,\
   com.orainge.tools.jobtimer.config.RestTemplateConfig,\
   com.orainge.tools.jobtimer.config.ScheduleExecutorConfig,\
   com.orainge.tools.jobtimer.controller.JobController,\
+  com.orainge.tools.jobtimer.controller.CheckAliveController,\
   com.orainge.tools.jobtimer.job.JobManager,\
   com.orainge.tools.jobtimer.util.BeanUtils,\
-  com.orainge.tools.jobtimer.util.HttpClient,\
+  com.orainge.tools.jobtimer.util.http.HttpClient,\
   com.orainge.tools.jobtimer.util.JSONUtils,\
   com.orainge.tools.jobtimer.util.ObjectUtils

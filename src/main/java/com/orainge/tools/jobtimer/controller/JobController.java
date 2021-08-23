@@ -87,15 +87,17 @@ public class JobController {
                     return Result.notFound();
                 } else {
                     // 执行任务
-                    JobResult execResult = JobManager.execute(jobName);
+                    // 获取参数
+                    Map<String, String[]> requestParam = request.getParameterMap();
+                    JobResult execResult = JobManager.execute(jobName, requestParam);
 
                     // 返回结果
-                    log.info("[API] - 任务通过 API 执行完成: {}", jsonUtils.toJSONString(execResult));
+                    log.info("[任务 API 控制器] - 任务通过 API 执行完成: {}", jsonUtils.toJSONString(execResult));
                     return Result.ok().setMessage("任务通过 API 执行完成").setData(execResult);
                 }
             }
         } catch (Exception e) {
-            log.error("[API] - 任务通过 API 执行失败", e);
+            log.error("[任务 API 控制器] - 任务通过 API 执行失败", e);
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             return Result.ok().setMessage("任务通过 API 执行失败" + ": " + e.getMessage());
         }

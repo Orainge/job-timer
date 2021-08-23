@@ -13,7 +13,7 @@ import java.util.Map;
  * @date 2021/6/10
  */
 @Configuration
-@ConfigurationProperties(prefix = "api")
+@ConfigurationProperties(prefix = "job-timer.extra-api")
 public class ApiConfig {
     private Map<String, ApiDetailsConfig> config;
 

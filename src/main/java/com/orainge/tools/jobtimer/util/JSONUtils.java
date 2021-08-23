@@ -3,10 +3,12 @@ package com.orainge.tools.jobtimer.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * JSON 工具类
@@ -41,6 +43,14 @@ public class JSONUtils {
     public <T> T parseObject(String text, Class<T> clazz) {
         try {
             return StringUtils.isEmpty(text) || clazz == null ? null : objectMapper.readValue(text, clazz);
+        } catch (Exception ignore) {
+            return null;
+        }
+    }
+
+    public Map<String, Object> parseObjectToMap(String text) {
+        try {
+            return StringUtils.isEmpty(text) ? null : objectMapper.readValue(text, ModelMap.class);
         } catch (Exception ignore) {
             return null;
         }
