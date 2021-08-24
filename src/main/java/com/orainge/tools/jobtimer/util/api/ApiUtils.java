@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -23,7 +22,7 @@ import java.util.Objects;
  * 外部 API 调用工具类
  *
  * @author orainge
- * @date 2021/8/19
+ * @since 2021/8/19
  */
 public abstract class ApiUtils {
     @Resource

@@ -7,15 +7,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * HTTP 客户端请求
  *
  * @author orainge
- * @date 2021/8/23
+ * @since 2021/8/23
  */
 public class HttpClientParameter {
     public static final Integer noUrlEncode = 0;

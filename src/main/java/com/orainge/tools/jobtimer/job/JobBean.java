@@ -11,7 +11,7 @@ import java.util.Map;
  * 定时任务抽象类
  *
  * @author orainge
- * @date 2021/6/10
+ * @since 2021/6/10
  */
 public abstract class JobBean {
     private static Logger log = LoggerFactory.getLogger(JobBean.class);
@@ -80,5 +80,9 @@ public abstract class JobBean {
 
     protected void logError(String message, Object... arguments) {
         log.error("[" + name + "] - " + description + ": " + message, arguments);
+    }
+
+    protected void logError(String message, Throwable e) {
+        log.error("[" + name + "] - " + description, e);
     }
 }

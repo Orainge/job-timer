@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * 定时任务多线程配置
  *
  * @author orainge
- * @date 2021/6/10
+ * @since 2021/6/10
  */
 @Configuration
 @EnableScheduling

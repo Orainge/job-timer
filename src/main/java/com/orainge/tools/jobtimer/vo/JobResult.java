@@ -1,7 +1,6 @@
 package com.orainge.tools.jobtimer.vo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.orainge.tools.jobtimer.job.JobBean;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -11,9 +10,8 @@ import java.util.List;
  * 定时任务运行结果
  *
  * @author orainge
- * @date 2021/4/21
+ * @since 2021/4/21
  */
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class JobResult {
     /**

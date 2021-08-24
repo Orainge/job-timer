@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
  * 返回结果类
  *
  * @author orainge
- * @date 2021/8/19
+ * @since 2021/8/19
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Result {

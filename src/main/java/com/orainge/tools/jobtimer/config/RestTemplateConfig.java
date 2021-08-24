@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
  * RestTemplate 配置文件，兼容 http 和 https
  *
  * @author orainge
- * @date 2021/6/10
+ * @since 2021/6/10
  */
 @Configuration
 @ConditionalOnMissingBean({RestTemplateConfig.class})

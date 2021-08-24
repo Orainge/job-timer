@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
  * 检测系统是否正常运行 Controller
  *
  * @author orainge
- * @date 2021/8/22
+ * @since 2021/8/22
  */
 @Controller
 @ConditionalOnMissingBean({CheckAliveController.class})

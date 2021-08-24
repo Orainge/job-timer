@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
  * 外部 API 配置文件
  *
  * @author orainge
- * @date 2021/6/10
+ * @since 2021/6/10
  */
 @Configuration
 @ConfigurationProperties(prefix = "job-timer.system")

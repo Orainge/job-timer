@@ -4,7 +4,7 @@ package com.orainge.tools.jobtimer.util.http;
  * 自定义的 URLEncode 方法
  *
  * @author orainge
- * @date 2021/8/22
+ * @since 2021/8/22
  */
 public interface UrlEncodeMethod {
     /**
@@ -13,6 +13,6 @@ public interface UrlEncodeMethod {
      * @param str 原字符串
      * @return 编码后的字符串
      */
-    public String encode(String str);
+    String encode(String str);
 }
 

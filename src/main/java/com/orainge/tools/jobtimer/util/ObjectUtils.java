@@ -16,7 +16,7 @@ import java.util.Objects;
  * 对象工具类
  *
  * @author orainge
- * @date 2021/6/10
+ * @since 2021/6/10
  */
 @Component
 @ConditionalOnMissingBean({ObjectUtils.class})
@@ -40,7 +40,7 @@ public class ObjectUtils {
      * @param obj       要获取属性值的对象
      * @param fieldName 字段名
      * @author orainge
-     * @date 2021/6/10
+     * @since 2021/6/10
      */
     public Object getFieldValueByName(Object obj, String fieldName) {
         try {
@@ -59,7 +59,7 @@ public class ObjectUtils {
      * @param obj       要获取属性值的对象
      * @param fieldName 字段名
      * @author orainge
-     * @date 2021/6/10
+     * @since 2021/6/10
      */
     @SuppressWarnings("all")
     public <T> T getFieldValueByName(Object obj, String fieldName, Class<T> clazz) {
@@ -136,7 +136,6 @@ public class ObjectUtils {
             return null;
         }
     }
-
 
     /**
      * object 转 object
