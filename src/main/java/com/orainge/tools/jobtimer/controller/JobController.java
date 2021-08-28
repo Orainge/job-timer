@@ -99,7 +99,7 @@ public class JobController {
         } catch (Exception e) {
             log.error("[任务 API 控制器] - 任务通过 API 执行失败", e);
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return Result.ok().setMessage("任务通过 API 执行失败" + ": " + e.getMessage());
+            return Result.error().setMessage("任务通过 API 执行失败" + ": " + e.getMessage());
         }
     }
 }
