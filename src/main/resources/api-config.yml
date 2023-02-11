@@ -5,11 +5,12 @@ job-timer:
       # 接口1
       api1:
         url: https://api.xxx1.com
-        need-key: true
-        key-parameter-name: key
-        keys: key1, key2, key3
+        need-key: true # 该API是否需要 key 验证
+        key-parameter-name: key # Key 参数名称
+        keys: key1, key2, key3 # 多个可用的 Key
         retry-times: 3 # 连接失败的重试次数
         api:
+        	# 第三方接口名称1：第三方接口 URL
           apiName1: /apiname1
       # 接口 2
       api2:
