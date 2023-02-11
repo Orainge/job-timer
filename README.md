@@ -77,7 +77,7 @@ job-timer:
         keys: key1, key2, key3 # 多个可用的 Key
         retry-times: 3 # 连接失败的重试次数
         api:
-        	# 第三方接口名称1：第三方接口 URL
+          # 第三方接口名称1：第三方接口 URL
           apiName1: /apiname1
       # 接口 2
       api2:
